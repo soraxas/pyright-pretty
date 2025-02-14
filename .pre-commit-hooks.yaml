@@ -2,7 +2,7 @@
     name: Python type checker [pyright]
     description: Typecheck the current project with the pyright tool
     entry: pyright-pretty
-    language: node
+    language: python
     types: [python]
     args:
       - --installer=npm
