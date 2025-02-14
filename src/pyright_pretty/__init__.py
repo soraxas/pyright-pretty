@@ -20,7 +20,6 @@ from rich.logging import RichHandler
 
 logger = logging.getLogger(__name__)
 
-console = Console()
 InstallersT = Literal["bun", "yarn", "npm"]
 
 
@@ -316,7 +315,7 @@ class Pyright(BaseModel):
     }
     errors: list[PyrightDiagnostic] = Field(default_factory=list)
 
-    def error(self, message: str, console: Console = Console()) -> None:
+    def error(self, message: str, console: Console = Console(soft_wrap=True)) -> None:
         console.print(f"[red]{message}[/red]")
         sys.exit(1)
 
@@ -583,7 +582,7 @@ class PyrightRunner(BaseModel):
         if output.returncode == 0:
             return output.returncode
 
-        console = Console()
+        console = Console(soft_wrap=True)
         console.print(
             output.pretty_fmt(
                 context_lines=parsed.context,
@@ -592,12 +591,6 @@ class PyrightRunner(BaseModel):
         )
 
         return output.returncode
-
-
-a: int
-
-x: int
-a = "hi"
 
 
 def main() -> int:
