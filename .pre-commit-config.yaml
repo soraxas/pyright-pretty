@@ -5,7 +5,7 @@ repos:
       - id: check-hooks-apply
       - id: check-useless-excludes
   - repo: https://github.com/northisup/pyright-pretty
-    rev: e48fcc28787e46f96cbf045926b6d918ded740b7
+    rev: main
     hooks:
     - id: pyright-pretty
       name: Python type checker [pyright]

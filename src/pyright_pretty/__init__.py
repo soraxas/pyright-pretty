@@ -205,7 +205,7 @@ class PyrightDiagnostic(BaseModel):
                     if self.rule in PyrightDiagnosticRule.keys()
                     else ""
                 )
-                indicator_message = f"{line_prefix_std}{padding}[red]{indicator} [dim]{self.rule}[/red]{rule_flavor}"
+                indicator_message = f"{line_prefix_std}{padding}[red]{indicator} [dim]{self.rule}[/red]{rule_flavor}[/dim]"
                 output.append(indicator_message)
 
         # Print error message
