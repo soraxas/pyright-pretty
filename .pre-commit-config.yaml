@@ -11,6 +11,6 @@ repos:
       name: Python type checker [pyright]
       description: Typecheck the current project with the pyright tool
       entry: pyright-pretty
-      language: python
+      language: node
       types: [python]
       args: [ --installer=npm, --install-if-missing]

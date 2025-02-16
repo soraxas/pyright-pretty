@@ -2,6 +2,10 @@
   name: Python type checker [pyright]
   description: Typecheck the current project with the pyright tool
   entry: pyright-pretty
-  language: python
+  language: node
   types: [python]
-  args: [--installer=npm, --install-if-missing]
+  require_serial: false
+  additional_dependencies:
+    - "pyright@1.1.394"
+    - "typescript@5.0.0"
+    - "kleur@4.1.5"

@@ -1,5 +1,24 @@
 {
+  "name": "pyright-pretty",
+  "version": "1.0.0",
+  "description": "A pretty wrapper for pyright",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build && chmod +x dist/index.js"
+  },
   "dependencies": {
+    "kleur": "^4.1.5",
     "pyright": "^1.1.394"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.4",
+    "typescript": "^5.0.0"
   }
 }
