@@ -1,0 +1,27 @@
+[tools]
+bun        = "latest"
+node       = "latest"
+pre-commit = "latest"
+python     = "latest"
+
+[tasks.try]
+description = "try running the pre-commit hooks"
+run         = """git add . && pre-commit try-repo . """
+
+[tasks.try-mimic]
+description = "mimics the install process that pre-commit does for node packages"
+run = """
+    git add .
+    npm install --include=dev --include=prod --ignore-prepublish --no-progress --no-save .
+    npm pack
+    npm install -g pyright-pretty-1.0.0.tgz
+    which pyright-pretty
+    pyright-pretty --help
+    """
+
+[tasks.build]
+description = "runs stuff"
+run         = """bun build"""
+
+[tasks.test]
+depends = ["try-mimic"]
