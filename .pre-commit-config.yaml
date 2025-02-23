@@ -1,16 +1,10 @@
-
 repos:
-  - repo: meta
-    hooks:
-      - id: check-hooks-apply
-      - id: check-useless-excludes
-  - repo: https://github.com/northisup/pyright-pretty
-    rev: main
-    hooks:
-    - id: pyright-pretty
-      name: Python type checker [pyright]
-      description: Typecheck the current project with the pyright tool
-      entry: pyright-pretty
-      language: node
-      types: [python]
-      args: [ --installer=npm, --install-if-missing]
+- repo: meta
+  hooks:
+  - id: check-hooks-apply
+  - id: check-useless-excludes
+- repo: https://github.com/northisup/pyright-pretty
+  rev: main
+  hooks:
+  - id: pyright-pretty
+    args: [--installer=npm, --install-if-missing]

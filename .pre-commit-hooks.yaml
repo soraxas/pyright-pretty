@@ -6,6 +6,6 @@
   types: [python]
   require_serial: false
   additional_dependencies:
-    - "pyright@1.1.394"
-    - "typescript@5.0.0"
-    - "kleur@4.1.5"
+  - "pyright@1.1.394"
+  - "typescript@5.3.3"
+  - "kleur@4.1.5"

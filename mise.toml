@@ -1,6 +1,7 @@
 [tools]
 bun        = "latest"
 node       = "latest"
+npm        = "latest"
 pre-commit = "latest"
 python     = "latest"
 
@@ -19,9 +20,13 @@ run = """
     pyright-pretty --help
     """
 
+[tasks.try-mimic2]
+run = """
+    node npm install -g pyright-pretty-1.0.0.tgz pyright@1.1.394 typescript@5.0.0 kleur@4.1.5
+    """
 [tasks.build]
 description = "runs stuff"
-run         = """bun build"""
+run         = """bun install ."""
 
 [tasks.test]
 depends = ["try-mimic"]
