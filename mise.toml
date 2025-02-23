@@ -25,3 +25,17 @@ run         = """bun build"""
 
 [tasks.test]
 depends = ["try-mimic"]
+
+[tasks.clean]
+run = """
+    git clean -dfx --dry-run &&
+    read -p "Confirm (y/n): " confirm &&
+    [[ "$confirm" = "y" ]] && {
+        mise run clean-force
+    } || {
+        echo "Clean aborted"
+    }
+    """
+
+[tasks.clean-force]
+run = """git clean -dfx"""
