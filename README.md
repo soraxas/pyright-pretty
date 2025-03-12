@@ -18,9 +18,14 @@ if your `pyproject.toml` is not in the root of your repo, use `args` to specify 
   rev: v0.1.0
   hooks:
   - id: pyright-pretty
-    name: Python type checking [coding-agent]
+    name: Python type checking [project-one]
     files: path/to/pyproject_toml/dir/.*
     args: [--project=./path/to/pyproject_toml/dir/]
+  - id: pyright-pretty
+    name: Python type checking [project-two]
+    files: path/to/another_pyproject_toml/dir/.*
+    args: [--project=./path/to/another_pyproject_toml/dir/]
+
 ```
 
 ## cli options
