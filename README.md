@@ -1,6 +1,27 @@
 # Pyright Pretty!
 
 the pryright output is difficult to read, this project wraps it and shows it in a ruff-like way.
+## pre-commit
+
+
+```yaml
+- repo: https://github.com/northisup/pyright-pretty
+  rev: v0.1.0
+  hooks:
+  - id: pyright-pretty
+```
+
+if your `pyproject.toml` is not in the root of your repo, use `args` to specify the project directory like so:
+
+```yaml
+- repo: https://github.com/northisup/pyright-pretty
+  rev: v0.1.0
+  hooks:
+  - id: pyright-pretty
+    name: Python type checking [coding-agent]
+    files: path/to/pyproject_toml/dir/.*
+    args: [--project=./path/to/pyproject_toml/dir/]
+```
 
 ## cli options
 
