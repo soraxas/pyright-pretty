@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "kleur": "^4.1.5",
-    "pyright": "^1.1.394"
+    "pyright": "^1.1.394",
+    "pyright-pretty": "."
   },
   "devDependencies": {
     "@types/node": "22.13.4",

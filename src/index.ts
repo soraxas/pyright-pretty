@@ -76,15 +76,51 @@ export class PyrightError extends Error implements PyrightDiagnostic {
 
       this.context.forEach((line, i) => {
         const lineNum = startLine + i;
-        const prefix = lineNum === this.range.start.line ? ">" : " ";
-        const lineNumStr = dim(`${lineNum + 1}`.padStart(3));
-        output.push(`${prefix} ${lineNumStr} │ ${line}`);
+        const isErrorStartLine = lineNum === this.range.start.line;
+        const isWithinErrorLineRange =
+          lineNum >= this.range.start.line && lineNum <= this.range.end.line;
 
-        if (lineNum === this.range.start.line) {
+        const linePrefix = isWithinErrorLineRange ? ">" : " ";
+
+        const lineNumStr = dim(`${lineNum + 1}`.padStart(3));
+        let formattedLine = line;
+        if (isWithinErrorLineRange) {
+          const startChar =
+            lineNum === this.range.start.line ? this.range.start.character : 0;
+          const endChar =
+            lineNum === this.range.end.line
+              ? this.range.end.character
+              : line.length; // Highlight to end if start/middle of multi-line
+
+          const before = line.substring(0, startChar);
+          const highlighted = red(line.substring(startChar, endChar));
+          const after = line.substring(endChar);
+          formattedLine = before + highlighted + after;
+        }
+
+        output.push(`${linePrefix} ${lineNumStr} │ ${formattedLine}`);
+
+        // Indicator logic
+        const isSingleLineError = this.range.start.line === this.range.end.line;
+
+        // Single-line error: Underline the range on the start line
+        if (isErrorStartLine && isSingleLineError) {
           const padding = " ".repeat(this.range.start.character);
-          const indicator = "^".repeat(
+          const rangeLength = Math.max(
+            1,
             this.range.end.character - this.range.start.character
           );
+          const indicator = "^".repeat(rangeLength);
+          output.push(
+            `      │ ${padding}${red(`${indicator} ${dim(this.rule)}`)}`
+          );
+        }
+
+        // Multi-line error: Place caret under the end character on the end line
+        if (lineNum === this.range.end.line && !isSingleLineError) {
+          // Subtract 1 from end character for correct alignment
+          const padding = " ".repeat(this.range.end.character - 1);
+          const indicator = "^";
           output.push(
             `      │ ${padding}${red(`${indicator} ${dim(this.rule)}`)}`
           );

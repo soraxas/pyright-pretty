@@ -7,7 +7,12 @@ python     = "latest"
 
 [tasks.try]
 description = "try running the pre-commit hooks"
-run         = """git add . && pre-commit try-repo . """
+run         = """git add . && pre-commit try-repo . --all-files"""
+
+[tasks.test]
+depends     = ["build"]
+description = "test the pre-commit hooks"
+run         = """bunx pyright-pretty tests/tests.py"""
 
 [tasks.try-mimic]
 description = "mimics the install process that pre-commit does for node packages"
@@ -26,10 +31,8 @@ run = """
     """
 [tasks.build]
 description = "runs stuff"
-run         = """bun install ."""
+run         = """rm -rf dist && bun run build"""
 
-[tasks.test]
-depends = ["try-mimic"]
 
 [tasks.clean]
 run = """
