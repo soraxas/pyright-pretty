@@ -6,5 +6,5 @@ repos:
 - repo: https://github.com/northisup/pyright-pretty
   rev: main
   hooks:
+  - id: pyright
   - id: pyright-pretty
-    args: [--installer=npm, --install-if-missing]
