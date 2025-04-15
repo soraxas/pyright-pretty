@@ -18,6 +18,10 @@ export class PyrightError extends Error {
     }
     formatError(contextLines = 2) {
         const output = [];
+        // Check if range is defined
+        if (!this.range) {
+            return `Error: ${this.message}`;
+        }
         // File location
         output.push(kleur.blue(`${this.file}:${this.range.start.line + 1}:${this.range.start.character + 1}`));
         // Context lines

@@ -61,6 +61,11 @@ export class PyrightError extends Error implements PyrightDiagnostic {
   formatError(contextLines = 2): string {
     const output: string[] = [];
 
+    // Check if range is defined
+    if (!this.range) {
+      return `Error: ${this.message}`;
+    }
+
     // File location
     output.push(
       kleur.blue(
