@@ -7,7 +7,7 @@ python     = "latest"
 
 [tasks.try]
 description = "try running the pre-commit hooks"
-run         = """git add . && pre-commit try-repo . --all-files"""
+run         = """clear && git add . && pre-commit try-repo . --all-files"""
 
 [tasks.test]
 depends     = ["build"]
@@ -47,3 +47,7 @@ run = """
 
 [tasks.clean-force]
 run = """git clean -dfx"""
+
+[tasks.pyright-pretty]
+depends = ["build"]
+run     = """bunx pyright-pretty -- --project=./tests"""

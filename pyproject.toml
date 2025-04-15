@@ -5,10 +5,7 @@ description     = "Add your description here"
 readme          = "README.md"
 authors         = [{ name = "Adam Hitchcock", email = "adam@northisup.com" }]
 requires-python = ">=3.10"
-dependencies    = [
-    "pydantic>=2.10.6",
-    "rich>=13.9.4",
-]
+dependencies    = ["pydantic>=2.10.6", "rich>=13.9.4"]
 
 [project.scripts]
 pyright-pretty = "pyright_pretty:main"
@@ -16,3 +13,25 @@ pyright-pretty = "pyright_pretty:main"
 [build-system]
 requires      = ["hatchling"]
 build-backend = "hatchling.build"
+
+
+[tool.pyright]
+typeCheckingMode = "basic"
+include          = ["tests"]
+exclude          = ["**/__pycache__", "**/aws.py", "**/.direnv", "**/.venv"]
+# defineConstant = { DEBUG = true }
+
+reportConstantRedefinition       = "error"
+reportDuplicateImport            = "error"
+reportImportCycles               = "error"
+reportIncompatibleMethodOverride = "error"
+reportInvalidTypeVarUse          = "error"
+reportMissingImports             = "error"
+reportMissingModuleSource        = "error"
+reportSelfClsParameterName       = "error"
+reportUntypedBaseClass           = "error"
+reportUntypedClassDecorator      = "error"
+reportUnusedImport               = "error"
+strictDictionaryInference        = true
+strictListInference              = true
+strictSetInference               = true

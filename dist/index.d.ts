@@ -11,7 +11,7 @@ export interface PyrightDiagnostic {
     file: string;
     severity: "error" | "warning" | "information";
     message: string;
-    range: Range;
+    range: Range | undefined;
     rule: string;
 }
 export interface PyrightSummary {
@@ -33,7 +33,7 @@ export declare class PyrightError extends Error implements PyrightDiagnostic {
     readonly file: string;
     readonly severity: "error" | "warning" | "information";
     readonly message: string;
-    readonly range: Range;
+    readonly range: Range | undefined;
     readonly rule: string;
     constructor(diagnostic: PyrightDiagnostic, context: string[]);
     formatError(contextLines?: number): string;

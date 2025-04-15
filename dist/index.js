@@ -4,6 +4,52 @@ import { readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import kleur from "kleur";
 const { bold, blue, red, yellow, dim, green } = kleur;
+const dimRed = (s) => dim(red(s));
+function pushHelp(output, message, color = red) {
+    output.push(` ${dim("help ~")} ${color(message)}`);
+}
+function pushError(output, message) {
+    output.push(`     ${red("^ ")} ${dimRed(message)}`);
+}
+function buildIndicator(start, length, message = "") {
+    const padding = " ".repeat(start);
+    const indicator = red("^".repeat(length));
+    return `${padding}${indicator}${message ? ` ${dimRed(message)}` : ""}`;
+}
+function pushFile(output, diagnostic) {
+    let formatted = "";
+    if (diagnostic.range !== undefined) {
+        const startLine = diagnostic.range.start.line + 1;
+        const startChar = diagnostic.range.start.character + 1;
+        formatted = blue(`${diagnostic.file}:${startLine}:${startChar}`);
+    }
+    else {
+        formatted = blue(diagnostic.file);
+    }
+    const formattedRule = diagnostic.rule ? ` → ${dimRed(diagnostic.rule)}` : "";
+    const formattedSeverity = diagnostic.severity === "error"
+        ? red("error")
+        : diagnostic.severity === "warning"
+            ? yellow("warning")
+            : green("information");
+    output.push(`${formattedSeverity} ${formatted}${formattedRule}`);
+}
+function pushLine(output, line) {
+    output.push(line);
+}
+function pushNumberedLine(output, line, lineNum, indicated = false) {
+    output.push(`${indicated ? ">" : " "}${dim(`${lineNum + 1}`.padStart(4))} │ ${line}`);
+}
+function pushContext(output, context = "", color = (s) => s) {
+    if (typeof context === "string") {
+        output.push(`      │ ${color(context)}`);
+    }
+    else {
+        for (const line of context) {
+            output.push(`      │ ${color(line)}`);
+        }
+    }
+}
 export class PyrightError extends Error {
     constructor(diagnostic, context) {
         super(diagnostic.message);
@@ -18,21 +64,39 @@ export class PyrightError extends Error {
     }
     formatError(contextLines = 2) {
         const output = [];
-        // Check if range is defined
-        if (!this.range) {
-            return `Error: ${this.message}`;
+        if (this.range === undefined) {
+            // file-level errors
+            pushFile(output, this);
+            switch (this.rule) {
+                case "reportImportCycles": {
+                    const errorLines = this.message.split("\n");
+                    const helpMsg = errorLines[0];
+                    const cycleImports = errorLines.slice(1);
+                    for (const cycleImport of cycleImports) {
+                        output.push(`>     │     ${cycleImport.trim()}`);
+                    }
+                    pushHelp(output, helpMsg, kleur.dim);
+                    break;
+                }
+                default: {
+                    pushError(output, this.message);
+                    pushHelp(output, this.rule, kleur.dim);
+                    pushLine(output, `---> ${this.rule} needs custom handling`);
+                }
+            }
+            return output.join("\n");
         }
         // File location
-        output.push(kleur.blue(`${this.file}:${this.range.start.line + 1}:${this.range.start.character + 1}`));
+        pushFile(output, this);
         // Context lines
         if (this.context.length) {
             const startLine = Math.max(0, this.range.start.line - contextLines);
             this.context.forEach((line, i) => {
+                if (this.range === undefined)
+                    return;
                 const lineNum = startLine + i;
                 const isErrorStartLine = lineNum === this.range.start.line;
                 const isWithinErrorLineRange = lineNum >= this.range.start.line && lineNum <= this.range.end.line;
-                const linePrefix = isWithinErrorLineRange ? ">" : " ";
-                const lineNumStr = dim(`${lineNum + 1}`.padStart(3));
                 let formattedLine = line;
                 if (isWithinErrorLineRange) {
                     const startChar = lineNum === this.range.start.line ? this.range.start.character : 0;
@@ -44,27 +108,22 @@ export class PyrightError extends Error {
                     const after = line.substring(endChar);
                     formattedLine = before + highlighted + after;
                 }
-                output.push(`${linePrefix} ${lineNumStr} │ ${formattedLine}`);
+                pushNumberedLine(output, formattedLine, lineNum, isWithinErrorLineRange);
                 // Indicator logic
                 const isSingleLineError = this.range.start.line === this.range.end.line;
                 // Single-line error: Underline the range on the start line
                 if (isErrorStartLine && isSingleLineError) {
-                    const padding = " ".repeat(this.range.start.character);
                     const rangeLength = Math.max(1, this.range.end.character - this.range.start.character);
-                    const indicator = "^".repeat(rangeLength);
-                    output.push(`      │ ${padding}${red(`${indicator} ${dim(this.rule)}`)}`);
+                    pushContext(output, buildIndicator(this.range.start.character, rangeLength, this.rule));
                 }
                 // Multi-line error: Place caret under the end character on the end line
                 if (lineNum === this.range.end.line && !isSingleLineError) {
                     // Subtract 1 from end character for correct alignment
-                    const padding = " ".repeat(this.range.end.character - 1);
-                    const indicator = "^";
-                    output.push(`      │ ${padding}${red(`${indicator} ${dim(this.rule)}`)}`);
+                    pushContext(output, buildIndicator(this.range.end.character - 1, 1, this.rule));
                 }
             });
             // Error message
-            output.push(dim("      │"));
-            output.push(` ${dim("help ~")} ${red(this.message)}`);
+            pushHelp(output, this.message);
         }
         return output.join("\n");
     }
@@ -72,6 +131,9 @@ export class PyrightError extends Error {
 export class Pyright {
     async getContext(diagnostic, contextLines = 2) {
         try {
+            if (!diagnostic.range) {
+                return [];
+            }
             const content = await readFile(diagnostic.file, "utf-8");
             const lines = content.split("\n");
             const startLine = Math.max(0, diagnostic.range.start.line - contextLines);
@@ -183,12 +245,19 @@ Options:
     const pyright = new Pyright();
     try {
         const result = await pyright.check(remaining);
+        if (args.debug) {
+            console.log(JSON.stringify(result, null, 2));
+        }
         if (result.generalDiagnostics.length > 0) {
             for (const diagnostic of result.generalDiagnostics) {
                 if (diagnostic instanceof PyrightError) {
                     console.log(`\n${diagnostic.formatError(args.context)}`);
                 }
+                else {
+                    console.error(`unknown error: ${JSON.stringify(diagnostic)}`);
+                }
             }
+            console.log("");
             if (args.showSummary) {
                 console.log(`\n${formatSummary(result.summary)}`);
             }

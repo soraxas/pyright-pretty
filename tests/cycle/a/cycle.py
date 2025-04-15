@@ -1,3 +1,8 @@
-from tests.cycle.b import cycle as b_cycle
+from ..b.cycle import b_func
 
-print(b_cycle.__file__)
+
+def a_func():
+    return b_func()
+
+
+print(a_func())
