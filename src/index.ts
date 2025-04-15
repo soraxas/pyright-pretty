@@ -19,7 +19,7 @@ export interface PyrightDiagnostic {
   file: string;
   severity: "error" | "warning" | "information";
   message: string;
-  range: Range;
+  range: Range | undefined;
   rule: string;
 }
 
@@ -42,7 +42,7 @@ export class PyrightError extends Error implements PyrightDiagnostic {
   readonly file: string;
   readonly severity: "error" | "warning" | "information";
   readonly message: string;
-  readonly range: Range;
+  readonly range: Range | undefined;
   readonly rule: string;
 
   constructor(
@@ -61,9 +61,10 @@ export class PyrightError extends Error implements PyrightDiagnostic {
   formatError(contextLines = 2): string {
     const output: string[] = [];
 
-    // Check if range is defined
-    if (!this.range) {
-      return `Error: ${this.message}`;
+    if (this.range === undefined) {
+      output.push(kleur.blue(this.file));
+      output.push(red(`      ^ Error: ${this.message}`));
+      return output.join("\n");
     }
 
     // File location
@@ -80,6 +81,8 @@ export class PyrightError extends Error implements PyrightDiagnostic {
       const startLine = Math.max(0, this.range.start.line - contextLines);
 
       this.context.forEach((line, i) => {
+        if (this.range === undefined) return;
+
         const lineNum = startLine + i;
         const isErrorStartLine = lineNum === this.range.start.line;
         const isWithinErrorLineRange =
@@ -147,6 +150,10 @@ export class Pyright {
     contextLines = 2
   ): Promise<string[]> {
     try {
+      if (!diagnostic.range) {
+        return [];
+      }
+
       const content = await readFile(diagnostic.file, "utf-8");
       const lines = content.split("\n");
       const startLine = Math.max(0, diagnostic.range.start.line - contextLines);
