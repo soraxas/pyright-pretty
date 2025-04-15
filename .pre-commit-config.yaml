@@ -12,3 +12,11 @@ repos:
   - id: pyright-pretty
     args:
     - -- --project=./tests
+- repo: local
+  hooks:
+  - id: mise-build
+    name: mise build
+    entry: mise run build
+    language: system
+    pass_filenames: false
+    types: [python]
